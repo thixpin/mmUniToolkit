@@ -9,6 +9,7 @@ import androidx.core.content.ContextCompat;
 import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -34,22 +35,25 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.github.inflationx.viewpump.ViewPumpContextWrapper;
 import mabbas007.tagsedittext.TagsEditText;
 
 public class CustomizeActivity extends AppCompatActivity {
     TextView textView;
     TagsEditText tagsEditText;
     final int FILE_CODE = 1;
-    ArrayList<String> selected_files;
+    ArrayList<String> selected_files = new ArrayList<>();
     Switch changeFolderName;
     ProgressDialog progressDialog;
     LinearLayout rootLayout,adLayout;
     Interstitial interstitial;
+    public static CustomizeActivity instance;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_customize);
 
+        instance = this;
         if (getActionBar()!=null){
             getActionBar().setDisplayHomeAsUpEnabled(true);
         }
@@ -123,8 +127,10 @@ public class CustomizeActivity extends AppCompatActivity {
 
             for (Uri uri : selected) {
                 File file = Utils.getFileForUri(uri);
-                selected_files.add(file.toString());
-                textView.append(file.toString() + "\n");
+                if (file!=null) {
+                    selected_files.add(file.toString());
+                    textView.append(file.toString() + "\n");
+                }
             }
         }
     }
@@ -139,6 +145,9 @@ public class CustomizeActivity extends AppCompatActivity {
     private void alert(){
         String title = "သတိပေးချက်";
         String message = "ရွေးချယ်ထားသောဖိုင်များအားလုံးကို\nယူနီကုဒ်အမည်ဖြင့်ပြောင်းလဲပေးမည်။";
+        if (Constants.CHANGING.equalsIgnoreCase("zawgyi")){
+            message = "ရွေးချယ်ထားသောဖိုင်များအားလုံးကို\nဇော်ဂျီအမည်ဖြင့်ပြောင်းလဲပေးမည်။";
+        }
 
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this)
@@ -168,6 +177,7 @@ public class CustomizeActivity extends AppCompatActivity {
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
+                Toolkit.resetPathsAndMimeType();
                 progressDialog.setMessage("Converting...");
                 progressDialog.show();
             }
@@ -191,22 +201,60 @@ public class CustomizeActivity extends AppCompatActivity {
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
                 progressDialog.dismiss();
-                Toolkit.updateMEDIA(CustomizeActivity.this);
-                done();
+                done(false);
             }
         }.execute();
     }
 
-    private void done(){
-        interstitial.show();
-        Snackbar.make(rootLayout,"ပြီးပါပြီ",Snackbar.LENGTH_LONG)
-                .setAction("ဟုတ်ပြီ", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        interstitial.show();
-                    }
-                })
-                .show();
+    public void done(final boolean done){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (done){
+                    interstitial.show();
+                    Snackbar.make(rootLayout, "ပြီးပါပြီ", Snackbar.LENGTH_LONG)
+                            .setAction("ဟုတ်ပြီ", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    interstitial.show();
+                                }
+                            })
+                            .show();
+                }else {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(instance)
+                            .setTitle("အားလုံးပြောင်းပြီးပါပြီ။")
+                            .setMessage("အချို့ Player နှင့် Gallery များတွင်ပြောင်းထားတာမြင်နိုင်ရင်\n" +
+                                    "Media ဖိုင်များ Update လုပ်ပေးရန်လိုအပ်ပါသည်။\n" +
+                                    "သို့မဟုတ်ဖုန်းကို Restart(ပိတ်ပြီးပြန်ဖွင့်) လုပ်၍လည်းရပါသည်။\n" +
+                                    "အကောင်းဆုံးကတော့ဖုန်းကို Restart လုပ်လိုက်ပါ။\n" +
+                                    "သို့မဟုတ် အောက်ပါ Normal Update နဲ့လုပ်လိုက်ပါ။\n" +
+                                    "\n" +
+                                    "Force Update ကတော့\n" +
+                                    "ပြောင်းခဲ့သမျှဖိုင်များအားလုံးကို Media အမည် Scan ပေးသွားမည်ဖြစ်သည်။\n" +
+                                    "ထိုကြောင့်တချို့ Hidden ဖိုင်များလည်း Media အဖြစ် Update လုပ်ပေးသောကြောင့်\n" +
+                                    "မလိုအပ်လျှင်မသုံးပါနှင့်!\n")
+                            .setPositiveButton("Normal Update", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Toolkit.scanMediaNormal(instance);
+                                }
+                            })
+                            .setNegativeButton("Force Update", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Toolkit.updateMEDIA(instance);
+                                }
+                            })
+                            .setNeutralButton("Done", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    interstitial.show();
+                                }
+                            });
+                    builder.show();
+                }
+            }
+        });
     }
 
 
@@ -243,5 +291,10 @@ public class CustomizeActivity extends AppCompatActivity {
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(ViewPumpContextWrapper.wrap(newBase));
     }
 }

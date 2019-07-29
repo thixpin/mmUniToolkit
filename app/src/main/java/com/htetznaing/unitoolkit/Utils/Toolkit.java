@@ -20,6 +20,7 @@ import android.widget.Toast;
 import androidx.core.os.EnvironmentCompat;
 
 import com.htetznaing.unitoolkit.Constants;
+import com.htetznaing.unitoolkit.CustomizeActivity;
 import com.htetznaing.unitoolkit.MainActivity;
 
 import org.jaudiotagger.audio.AudioFile;
@@ -321,7 +322,11 @@ public class Toolkit {
         if (m.length>1) {
             progressDialog.show();
         }else {
-            MainActivity.instance.done(true);
+            if (context==MainActivity.instance) {
+                MainActivity.instance.done(true);
+            }else {
+                CustomizeActivity.instance.done(true);
+            }
         }
 
         MediaScannerConnection.scanFile(context, p, m, new MediaScannerConnection.OnScanCompletedListener() {
@@ -330,7 +335,11 @@ public class Toolkit {
                 System.out.println("Scanned: "+path);
                 if (check==paths.size()-1){
                     progressDialog.dismiss();
-                    MainActivity.instance.done(true);
+                    if (context==MainActivity.instance) {
+                        MainActivity.instance.done(true);
+                    }else {
+                        CustomizeActivity.instance.done(true);
+                    }
                     check=0;
                 }else check++;
             }
