@@ -112,6 +112,13 @@ public class Toolkit {
         return path.isHidden();
     }
 
+    private static String getExt(String filePath){
+        int strLength = filePath.lastIndexOf(".");
+        if(strLength > 0)
+            return filePath.substring(strLength + 1).toLowerCase();
+        return null;
+    }
+
     public static void changeFileNameCustomExtension(File file,String extension,boolean changeFolderName){
         if (file!=null){
             for (File f:file.listFiles()){
@@ -143,8 +150,20 @@ public class Toolkit {
                     }
                 }else {
                     if (Constants.CHANGE_HIDDEN){
-                        String fileExt = MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(f).toString());
+                        String fileExt = getExt(f.toString());
+
+                        if (extension==null || extension.isEmpty() || extension.length()<2){
+                            extension = fileExt;
+                        }
+
+                        System.out.println("File Extension: "+fileExt+" | "+extension);
+
                         if (extension.contains(fileExt)) {
+
+                            if (extension.equalsIgnoreCase(fileExt)){
+                                extension=null;
+                            }
+
                             File newFile = new File(f.getParentFile() + "/" + AIOmmTool.getUnicode(f.getName()));
                             if (f.renameTo(newFile)) {
                                 if (isImageFile(f.toString()) || isVideoFile(f.toString()) || isAudioFile(f.toString())){
@@ -162,8 +181,18 @@ public class Toolkit {
                         }
                     }else {
                         if (!isHidden(f)){
-                            String fileExt = MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(f).toString());
+                            String fileExt = getExt(f.toString());
+                            if (extension==null || extension.isEmpty() || extension.length()<2){
+                                extension = fileExt;
+                            }
+
+                            System.out.println("File Extension: "+fileExt+" | "+extension);
+
                             if (extension.contains(fileExt)) {
+
+                                if (extension.equalsIgnoreCase(fileExt)){
+                                    extension=null;
+                                }
                                 File newFile = new File(f.getParentFile() + "/" + AIOmmTool.getUnicode(f.getName()));
                                 if (f.renameTo(newFile)) {
                                     if (isImageFile(f.toString()) || isVideoFile(f.toString()) || isAudioFile(f.toString())){

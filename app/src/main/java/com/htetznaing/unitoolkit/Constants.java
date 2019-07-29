@@ -20,7 +20,7 @@ public class Constants {
 
 
     public static AdRequest getAdBuilder(){
-        return new AdRequest.Builder().addTestDevice("97519ED2263009D76D7691B456383B6C").build();
+        return new AdRequest.Builder().build();
     }
 
     static {

@@ -27,6 +27,7 @@ import com.google.android.gms.ads.AdSize;
 import com.google.android.material.snackbar.Snackbar;
 import com.htetznaing.unitoolkit.Ads.Banner;
 import com.htetznaing.unitoolkit.Ads.Interstitial;
+import com.htetznaing.unitoolkit.Utils.AIOmmTool;
 import com.htetznaing.unitoolkit.Utils.Toolkit;
 import com.nononsenseapps.filepicker.FilePickerActivity;
 import com.nononsenseapps.filepicker.Utils;
@@ -185,15 +186,19 @@ public class CustomizeActivity extends AppCompatActivity {
             @Override
             protected Void doInBackground(Void... voids) {
                 String extension = tagsEditText.getText().toString();
-                if (extension!=null && !extension.isEmpty() && extension.length()>1){
                     for (String p:path){
+                        System.out.println("Change Folder: "+changeFolderName.isChecked());
+                        if (changeFolderName.isChecked()){
+                            File oldFile = new File(p);
+                            if (oldFile.isDirectory()){
+                                File newFile = new File(oldFile.getParentFile()+"/"+ AIOmmTool.getUnicode(oldFile.getName()));
+                                if (oldFile.renameTo(newFile)){
+                                    p = newFile.toString();
+                                }
+                            }
+                        }
                         Toolkit.changeFileNameCustomExtension(new File(p),extension,changeFolderName.isChecked());
                     }
-                }else {
-                    for (String p:path){
-                        Toolkit.changeFileNameToUnicode(new File(p));
-                    }
-                }
                 return null;
             }
 
