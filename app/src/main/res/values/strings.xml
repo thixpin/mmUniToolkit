@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">mmUnicode Toolkit</string>
+    <string name="title_activity_settings">Settings</string>
+
+
+    <string name="covert_title">Covert to</string>
+
+</resources>
