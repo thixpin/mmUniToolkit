@@ -33,13 +33,9 @@ import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
 import org.jaudiotagger.tag.TagException;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -48,57 +44,57 @@ import java.util.Map;
 public class Toolkit {
     private static ArrayList<String> paths,mimeType;
     static int check = 0;
-    public static void changeFileNameToUnicode(File file){
+    public static void changeFileNameToUnicode(File file,boolean force){
         if (file!=null){
             for (File f:file.listFiles()){
                 if (f.isDirectory()){
                     if (Constants.CHANGE_HIDDEN) {
-                        File newFile = new File(f.getParentFile() + "/" + AIOmmTool.getUnicode(f.getName()));
+                        File newFile = new File(f.getParentFile() + "/" + AIOmmTool.getUnicode(f.getName(),force));
                         if (f.renameTo(newFile)) {
-                            changeFileNameToUnicode(newFile);
+                            changeFileNameToUnicode(newFile,force);
                         } else {
-                            changeFileNameToUnicode(f);
+                            changeFileNameToUnicode(f,force);
                         }
                     }else {
                         if (!isHidden(f)){
-                            File newFile = new File(f.getParentFile() + "/" + AIOmmTool.getUnicode(f.getName()));
+                            File newFile = new File(f.getParentFile() + "/" + AIOmmTool.getUnicode(f.getName(),force));
                             if (f.renameTo(newFile)) {
-                                changeFileNameToUnicode(newFile);
+                                changeFileNameToUnicode(newFile,force);
                             } else {
-                                changeFileNameToUnicode(f);
+                                changeFileNameToUnicode(f,force);
                             }
                         }
                     }
                 }else {
                     if (Constants.CHANGE_HIDDEN){
-                        File newFile = new File(f.getParentFile()+"/"+AIOmmTool.getUnicode(f.getName()));
+                        File newFile = new File(f.getParentFile()+"/"+AIOmmTool.getUnicode(f.getName(),force));
                         if (f.renameTo(newFile)){
                             if (isImageFile(f.toString()) || isVideoFile(f.toString()) || isAudioFile(f.toString())){
                                 paths.add(newFile.toString());
                                 mimeType.add(getMimeType(newFile.toString()));
                             }
                             if (isAudioFile(newFile.toString())){
-                                editAudioTag(newFile);
+                                editAudioTag(newFile,force);
                             }
                         }else {
                             if (isAudioFile(f.toString())){
-                                editAudioTag(f);
+                                editAudioTag(f,force);
                             }
                         }
                     }else {
                         if (!isHidden(f)) {
-                            File newFile = new File(f.getParentFile()+"/"+AIOmmTool.getUnicode(f.getName()));
+                            File newFile = new File(f.getParentFile()+"/"+AIOmmTool.getUnicode(f.getName(),force));
                             if (f.renameTo(newFile)){
                                 if (isImageFile(f.toString()) || isVideoFile(f.toString()) || isAudioFile(f.toString())){
                                     paths.add(newFile.toString());
                                     mimeType.add(getMimeType(newFile.toString()));
                                 }
                                 if (isAudioFile(newFile.toString())){
-                                    editAudioTag(newFile);
+                                    editAudioTag(newFile,force);
                                 }
                             }else {
                                 if (isAudioFile(f.toString())){
-                                    editAudioTag(f);
+                                    editAudioTag(f,force);
                                 }
                             }
                         }
@@ -119,94 +115,101 @@ public class Toolkit {
         return null;
     }
 
-    public static void changeFileNameCustomExtension(File file,String extension,boolean changeFolderName){
+    public static void changeFileNameCustomExtension(File file,String extension,boolean changeFolderName,boolean force){
         if (file!=null){
+            if (file.isFile()){
+                changeCustom(file,extension,changeFolderName,force);
+            }else
             for (File f:file.listFiles()){
-                if (f.isDirectory()){
-                    if (Constants.CHANGE_HIDDEN){
-                        if (changeFolderName){
-                            File newFile = new File(f.getParentFile()+"/"+AIOmmTool.getUnicode(f.getName()));
-                            if (f.renameTo(newFile)) {
-                                changeFileNameCustomExtension(newFile,extension,changeFolderName);
-                            }else {
-                                changeFileNameCustomExtension(f,extension,changeFolderName);
-                            }
-                        }else {
-                            changeFileNameCustomExtension(f,extension,changeFolderName);
-                        }
+                changeCustom(f,extension,changeFolderName,force);
+            }
+        }
+    }
+
+    private static void changeCustom(File f,String extension,boolean changeFolderName,boolean force){
+        if (f.isDirectory()){
+            if (Constants.CHANGE_HIDDEN){
+                if (changeFolderName){
+                    File newFile = new File(f.getParentFile()+"/"+AIOmmTool.getUnicode(f.getName(),force));
+                    if (f.renameTo(newFile)) {
+                        changeFileNameCustomExtension(newFile,extension,changeFolderName,force);
                     }else {
-                        if (!isHidden(f)){
-                            if (changeFolderName){
-                                File newFile = new File(f.getParentFile()+"/"+AIOmmTool.getUnicode(f.getName()));
-                                if (f.renameTo(newFile)) {
-                                    changeFileNameCustomExtension(newFile,extension,changeFolderName);
-                                }else {
-                                    changeFileNameCustomExtension(f,extension,changeFolderName);
-                                }
-                            }else {
-                                changeFileNameCustomExtension(f,extension,changeFolderName);
-                            }
-                        }
+                        changeFileNameCustomExtension(f,extension,changeFolderName,force);
                     }
                 }else {
-                    if (Constants.CHANGE_HIDDEN){
-                        String fileExt = getExt(f.toString());
-
-                        if (extension==null || extension.isEmpty() || extension.length()<2){
-                            extension = fileExt;
-                        }
-
-                        System.out.println("File Extension: "+fileExt+" | "+extension);
-
-                        if (extension.contains(fileExt)) {
-
-                            if (extension.equalsIgnoreCase(fileExt)){
-                                extension=null;
-                            }
-
-                            File newFile = new File(f.getParentFile() + "/" + AIOmmTool.getUnicode(f.getName()));
-                            if (f.renameTo(newFile)) {
-                                if (isImageFile(f.toString()) || isVideoFile(f.toString()) || isAudioFile(f.toString())){
-                                    paths.add(newFile.toString());
-                                    mimeType.add(getMimeType(newFile.toString()));
-                                }
-                                if (isAudioFile(newFile.toString())){
-                                    editAudioTag(newFile);
-                                }
-                            }else {
-                                if (isAudioFile(f.toString())){
-                                    editAudioTag(f);
-                                }
-                            }
+                    changeFileNameCustomExtension(f,extension,changeFolderName,force);
+                }
+            }else {
+                if (!isHidden(f)){
+                    if (changeFolderName){
+                        File newFile = new File(f.getParentFile()+"/"+AIOmmTool.getUnicode(f.getName(),force));
+                        if (f.renameTo(newFile)) {
+                            changeFileNameCustomExtension(newFile,extension,changeFolderName,force);
+                        }else {
+                            changeFileNameCustomExtension(f,extension,changeFolderName,force);
                         }
                     }else {
-                        if (!isHidden(f)){
-                            String fileExt = getExt(f.toString());
-                            if (extension==null || extension.isEmpty() || extension.length()<2){
-                                extension = fileExt;
+                        changeFileNameCustomExtension(f,extension,changeFolderName,force);
+                    }
+                }
+            }
+        }else {
+            if (Constants.CHANGE_HIDDEN){
+                String fileExt = getExt(f.toString());
+
+                if (extension==null || extension.isEmpty() || extension.length()<2){
+                    extension = fileExt;
+                }
+
+                System.out.println("File Extension: "+fileExt+" | "+extension);
+
+                if (extension.contains(fileExt)) {
+
+                    if (extension.equalsIgnoreCase(fileExt)){
+                        extension=null;
+                    }
+
+                    File newFile = new File(f.getParentFile() + "/" + AIOmmTool.getUnicode(f.getName(),force));
+                    if (f.renameTo(newFile)) {
+                        if (isImageFile(f.toString()) || isVideoFile(f.toString()) || isAudioFile(f.toString())){
+                            paths.add(newFile.toString());
+                            mimeType.add(getMimeType(newFile.toString()));
+                        }
+                        if (isAudioFile(newFile.toString())){
+                            editAudioTag(newFile,force);
+                        }
+                    }else {
+                        if (isAudioFile(f.toString())){
+                            editAudioTag(f,force);
+                        }
+                    }
+                }
+            }else {
+                if (!isHidden(f)){
+                    String fileExt = getExt(f.toString());
+                    if (extension==null || extension.isEmpty() || extension.length()<2){
+                        extension = fileExt;
+                    }
+
+                    System.out.println("File Extension: "+fileExt+" | "+extension);
+
+                    if (extension.contains(fileExt)) {
+
+                        if (extension.equalsIgnoreCase(fileExt)){
+                            extension=null;
+                        }
+                        File newFile = new File(f.getParentFile() + "/" + AIOmmTool.getUnicode(f.getName(),force));
+                        if (f.renameTo(newFile)) {
+                            if (isImageFile(f.toString()) || isVideoFile(f.toString()) || isAudioFile(f.toString())){
+                                paths.add(newFile.toString());
+                                mimeType.add(getMimeType(newFile.toString()));
                             }
-
-                            System.out.println("File Extension: "+fileExt+" | "+extension);
-
-                            if (extension.contains(fileExt)) {
-
-                                if (extension.equalsIgnoreCase(fileExt)){
-                                    extension=null;
-                                }
-                                File newFile = new File(f.getParentFile() + "/" + AIOmmTool.getUnicode(f.getName()));
-                                if (f.renameTo(newFile)) {
-                                    if (isImageFile(f.toString()) || isVideoFile(f.toString()) || isAudioFile(f.toString())){
-                                        paths.add(newFile.toString());
-                                        mimeType.add(getMimeType(newFile.toString()));
-                                    }
-                                    if (isAudioFile(newFile.toString())){
-                                        editAudioTag(newFile);
-                                    }
-                                }else {
-                                    if (isAudioFile(f.toString())){
-                                        editAudioTag(f);
-                                    }
-                                }
+                            if (isAudioFile(newFile.toString())){
+                                editAudioTag(newFile,force);
+                            }
+                        }else {
+                            if (isAudioFile(f.toString())){
+                                editAudioTag(f,force);
                             }
                         }
                     }
@@ -221,31 +224,31 @@ public class Toolkit {
     }
 
 
-    public static void audioFileNameToUnicode(File file){
+    public static void audioFileNameToUnicode(File file,boolean force){
         if (file!=null){
             for (File f:file.listFiles()){
                 if (f.isDirectory()){
                     if (Constants.CHANGE_HIDDEN){
-                        audioFileNameToUnicode(f);
+                        audioFileNameToUnicode(f,force);
                     }else {
                         if (!isHidden(f)){
-                            audioFileNameToUnicode(f);
+                            audioFileNameToUnicode(f,force);
                         }
                     }
                 }else {
                     if (isAudioFile(f.toString())) {
                         if (Constants.CHANGE_HIDDEN){
-                            File newFile = new File(f.getParentFile() + "/" + AIOmmTool.getUnicode(f.getName()));
+                            File newFile = new File(f.getParentFile() + "/" + AIOmmTool.getUnicode(f.getName(),force));
                             if (f.renameTo(newFile)){
-                                editAudioTag(newFile);
+                                editAudioTag(newFile,force);
                                     paths.add(newFile.toString());
                                     mimeType.add(getMimeType(newFile.toString()));
                             }
                         }else {
                             if (!isHidden(f)){
-                                File newFile = new File(f.getParentFile() + "/" + AIOmmTool.getUnicode(f.getName()));
+                                File newFile = new File(f.getParentFile() + "/" + AIOmmTool.getUnicode(f.getName(),force));
                                 if (f.renameTo(newFile)){
-                                    editAudioTag(newFile);
+                                    editAudioTag(newFile,force);
                                     paths.add(newFile.toString());
                                     mimeType.add(getMimeType(newFile.toString()));
                                 }
@@ -257,29 +260,28 @@ public class Toolkit {
         }
     }
 
-
-    public static void videoFileNameToUnicode(File file){
+    public static void videoFileNameToUnicode(File file,boolean force){
         if (file!=null){
             for (File f:file.listFiles()){
                 if (f.isDirectory()){
                     if (Constants.CHANGE_HIDDEN){
-                        videoFileNameToUnicode(f);
+                        videoFileNameToUnicode(f,force);
                     }else {
                         if (!isHidden(f)){
-                            videoFileNameToUnicode(f);
+                            videoFileNameToUnicode(f,force);
                         }
                     }
                 }else {
                     if (isVideoFile(f.toString())) {
                         if (Constants.CHANGE_HIDDEN){
-                            File newFile = new File(f.getParentFile() + "/" + AIOmmTool.getUnicode(f.getName()));
+                            File newFile = new File(f.getParentFile() + "/" + AIOmmTool.getUnicode(f.getName(),force));
                             if (f.renameTo(newFile)){
                                     paths.add(newFile.toString());
                                     mimeType.add(getMimeType(newFile.toString()));
                             }
                         }else {
                             if (!isHidden(f)){
-                                File newFile = new File(f.getParentFile() + "/" + AIOmmTool.getUnicode(f.getName()));
+                                File newFile = new File(f.getParentFile() + "/" + AIOmmTool.getUnicode(f.getName(),force));
                                 if (f.renameTo(newFile)){
                                     paths.add(newFile.toString());
                                     mimeType.add(getMimeType(newFile.toString()));
@@ -292,28 +294,28 @@ public class Toolkit {
         }
     }
 
-    public static void imageFileNameToUnicode(File file){
+    public static void imageFileNameToUnicode(File file,boolean force){
         if (file!=null){
             for (File f:file.listFiles()){
                 if (f.isDirectory()){
                     if (Constants.CHANGE_HIDDEN){
-                        imageFileNameToUnicode(f);
+                        imageFileNameToUnicode(f,force);
                     }else {
                         if (!isHidden(f)){
-                            imageFileNameToUnicode(f);
+                            imageFileNameToUnicode(f,force);
                         }
                     }
                 }else {
                     if (isImageFile(f.toString())) {
                        if (Constants.CHANGE_HIDDEN){
-                           File newFile = new File(f.getParentFile() + "/" + AIOmmTool.getUnicode(f.getName()));
+                           File newFile = new File(f.getParentFile() + "/" + AIOmmTool.getUnicode(f.getName(),force));
                            if (f.renameTo(newFile)){
                                    paths.add(newFile.toString());
                                    mimeType.add(getMimeType(newFile.toString()));
                            }
                        }else {
                            if (!isHidden(f)){
-                               File newFile = new File(f.getParentFile() + "/" + AIOmmTool.getUnicode(f.getName()));
+                               File newFile = new File(f.getParentFile() + "/" + AIOmmTool.getUnicode(f.getName(),force));
                                if (f.renameTo(newFile)){
                                    paths.add(newFile.toString());
                                    mimeType.add(getMimeType(newFile.toString()));
@@ -384,7 +386,7 @@ public class Toolkit {
         return type;
     }
 
-    private static void editAudioTag(File audio){
+    private static void editAudioTag(File audio,boolean force){
         if (audio.getName().endsWith(".mp3")) {
             AudioFile audioFile = null;
             try {
@@ -392,17 +394,17 @@ public class Toolkit {
                 Tag tag = audioFile.getTagOrCreateAndSetDefault();
 
                 Map<FieldKey, String> fieldKeyValueMap = new EnumMap<>(FieldKey.class);
-                fieldKeyValueMap.put(FieldKey.TITLE, AIOmmTool.getUnicode(tag.getFirst(FieldKey.TITLE)));
-                fieldKeyValueMap.put(FieldKey.ALBUM, AIOmmTool.getUnicode(tag.getFirst(FieldKey.ALBUM)));
-                fieldKeyValueMap.put(FieldKey.ARTIST, AIOmmTool.getUnicode(tag.getFirst(FieldKey.ARTIST)));
-                fieldKeyValueMap.put(FieldKey.GENRE, AIOmmTool.getUnicode(tag.getFirst(FieldKey.GENRE)));
-                fieldKeyValueMap.put(FieldKey.YEAR, AIOmmTool.getUnicode(tag.getFirst(FieldKey.YEAR)));
-                fieldKeyValueMap.put(FieldKey.TRACK, AIOmmTool.getUnicode(tag.getFirst(FieldKey.TRACK)));
-                fieldKeyValueMap.put(FieldKey.LYRICS, AIOmmTool.getUnicode(tag.getFirst(FieldKey.LYRICS)));
-                fieldKeyValueMap.put(FieldKey.ALBUM_ARTIST, AIOmmTool.getUnicode(tag.getFirst(FieldKey.ALBUM_ARTIST)));
-                fieldKeyValueMap.put(FieldKey.ARTISTS, AIOmmTool.getUnicode(tag.getFirst(FieldKey.ARTISTS)));
-                fieldKeyValueMap.put(FieldKey.COMMENT, AIOmmTool.getUnicode(tag.getFirst(FieldKey.COMMENT)));
-                fieldKeyValueMap.put(FieldKey.COMPOSER, AIOmmTool.getUnicode(tag.getFirst(FieldKey.COMPOSER)));
+                fieldKeyValueMap.put(FieldKey.TITLE, AIOmmTool.getUnicode(tag.getFirst(FieldKey.TITLE),force));
+                fieldKeyValueMap.put(FieldKey.ALBUM, AIOmmTool.getUnicode(tag.getFirst(FieldKey.ALBUM),force));
+                fieldKeyValueMap.put(FieldKey.ARTIST, AIOmmTool.getUnicode(tag.getFirst(FieldKey.ARTIST),force));
+                fieldKeyValueMap.put(FieldKey.GENRE, AIOmmTool.getUnicode(tag.getFirst(FieldKey.GENRE),force));
+                fieldKeyValueMap.put(FieldKey.YEAR, AIOmmTool.getUnicode(tag.getFirst(FieldKey.YEAR),force));
+                fieldKeyValueMap.put(FieldKey.TRACK, AIOmmTool.getUnicode(tag.getFirst(FieldKey.TRACK),force));
+                fieldKeyValueMap.put(FieldKey.LYRICS, AIOmmTool.getUnicode(tag.getFirst(FieldKey.LYRICS),force));
+                fieldKeyValueMap.put(FieldKey.ALBUM_ARTIST, AIOmmTool.getUnicode(tag.getFirst(FieldKey.ALBUM_ARTIST),force));
+                fieldKeyValueMap.put(FieldKey.ARTISTS, AIOmmTool.getUnicode(tag.getFirst(FieldKey.ARTISTS),force));
+                fieldKeyValueMap.put(FieldKey.COMMENT, AIOmmTool.getUnicode(tag.getFirst(FieldKey.COMMENT),force));
+                fieldKeyValueMap.put(FieldKey.COMPOSER, AIOmmTool.getUnicode(tag.getFirst(FieldKey.COMPOSER),force));
 
                 for (Map.Entry<FieldKey, String> entry : fieldKeyValueMap.entrySet()) {
                     try {
@@ -429,7 +431,7 @@ public class Toolkit {
     }
 
 
-    public static void changeContacts(Context context) {
+    public static void changeContacts(Context context,boolean force) {
         ContentResolver cr = context.getContentResolver();
         Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI,
                 null, null, null, null);
@@ -437,7 +439,7 @@ public class Toolkit {
             while (cur != null && cur.moveToNext()) {
                 String name = cur.getString(cur.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
                 String id = cur.getString(cur.getColumnIndex(ContactsContract.Contacts._ID));
-                System.out.println(updateContact(context,id,AIOmmTool.getUnicode(name)));
+                System.out.println(updateContact(context,id,AIOmmTool.getUnicode(name,force)));
             }
         }
         if(cur!=null){

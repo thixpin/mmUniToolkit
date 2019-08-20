@@ -16,18 +16,6 @@
 
 <androidx.preference.PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory app:title="Zawgyi or Unicode">
-
-        <ListPreference
-            app:defaultValue="unicode"
-            app:entries="@array/convert_entries"
-            app:entryValues="@array/convert_values"
-            app:key="convert"
-            app:title="@string/covert_title"
-            app:useSimpleSummaryProvider="true" />
-
-    </PreferenceCategory>
-
 
     <PreferenceCategory app:title="Change Name">
 

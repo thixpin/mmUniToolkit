@@ -23,10 +23,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.ads.AdSize;
 import com.google.android.material.snackbar.Snackbar;
-import com.htetznaing.unitoolkit.Ads.Banner;
-import com.htetznaing.unitoolkit.Ads.Interstitial;
 import com.htetznaing.unitoolkit.Utils.AIOmmTool;
 import com.htetznaing.unitoolkit.Utils.Toolkit;
 import com.nononsenseapps.filepicker.FilePickerActivity;
@@ -46,8 +43,7 @@ public class CustomizeActivity extends AppCompatActivity {
     ArrayList<String> selected_files = new ArrayList<>();
     Switch changeFolderName;
     ProgressDialog progressDialog;
-    LinearLayout rootLayout,adLayout;
-    Interstitial interstitial;
+    LinearLayout rootLayout;
     public static CustomizeActivity instance;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,14 +68,10 @@ public class CustomizeActivity extends AppCompatActivity {
         if (checkText.length()>1){
             textView.setText("");
         }
+
         for (String s:getStorage()){
             textView.append(s+"\n");
         }
-
-
-        adLayout = findViewById(R.id.adLayout);
-        new Banner(this,adLayout, AdSize.MEDIUM_RECTANGLE);
-        interstitial = new Interstitial(this);
     }
 
     public void chooseFileOrFolder(View view) {
@@ -119,6 +111,7 @@ public class CustomizeActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
         if (requestCode == FILE_CODE && resultCode == Activity.RESULT_OK) {
+            selected_files.clear();
             // Use the provided utility method to parse the result
             List<Uri> selected = Utils.getSelectedFilesFromResult(intent);
             String checkText = textView.getText().toString();
@@ -146,10 +139,6 @@ public class CustomizeActivity extends AppCompatActivity {
     private void alert(){
         String title = "သတိပေးချက်";
         String message = "ရွေးချယ်ထားသောဖိုင်များအားလုံးကို\nယူနီကုဒ်အမည်ဖြင့်ပြောင်းလဲပေးမည်။";
-        if (Constants.CHANGING.equalsIgnoreCase("zawgyi")){
-            message = "ရွေးချယ်ထားသောဖိုင်များအားလုံးကို\nဇော်ဂျီအမည်ဖြင့်ပြောင်းလဲပေးမည်။";
-        }
-
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this)
                 .setTitle(title)
@@ -158,21 +147,48 @@ public class CustomizeActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         if (checkPermissions()){
-                            changeLOL(selected_files);
+                            next();
                         }
                     }
                 })
                 .setNegativeButton("မလုပ်ပါ", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        interstitial.show();
+                    }
+                });
+        builder.show();
+    }
+
+    private void next(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setTitle("သတိပြုရန်!!")
+                .setMessage("သင်ပြောင်းမည့်အရာသည် အားလုံးဇော်ဂျီဖြစ်နေရင်\n" +
+                        "* မဖြစ်မနေပြောင်းမည် * ကိုရွေးချယ်ပါ။\n" +
+                        "ဇော်ဂျီနှင့်ယူနီကုဒ်ရောထွေးနေပါက * အလိုအလျောက် * ကိုရွေးချယ်ပါ။\n" +
+                        "အဘယ်ကြောင့်ဆိုသော် ယူနီကုဒ်ဖြင့်ရေးထားသည့်စာများပါဝင်နေပါက\n" +
+                        "ယူနီကုဒ်သို့မဖြစ်မနေပြောင်းသောအခါ စာများလုံးဝလွဲသွားမည်ဖြစ်သည်။")
+                .setPositiveButton("အလိုအလျောက်", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        changeLOL(selected_files,false);
+                    }
+                })
+                .setNegativeButton("မဖြစ်မနေပြောင်းမည်", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        changeLOL(selected_files,true);
+                    }
+                })
+                .setNeutralButton("မလုပ်တော့ပါ", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
                     }
                 });
         builder.show();
     }
 
 
-    private void changeLOL(final ArrayList<String> path){
+    private void changeLOL(final ArrayList<String> path, final boolean force){
         new AsyncTask<Void,Void,Void>(){
 
             @Override
@@ -191,13 +207,13 @@ public class CustomizeActivity extends AppCompatActivity {
                         if (changeFolderName.isChecked()){
                             File oldFile = new File(p);
                             if (oldFile.isDirectory()){
-                                File newFile = new File(oldFile.getParentFile()+"/"+ AIOmmTool.getUnicode(oldFile.getName()));
+                                File newFile = new File(oldFile.getParentFile()+"/"+ AIOmmTool.getUnicode(oldFile.getName(),force));
                                 if (oldFile.renameTo(newFile)){
                                     p = newFile.toString();
                                 }
                             }
                         }
-                        Toolkit.changeFileNameCustomExtension(new File(p),extension,changeFolderName.isChecked());
+                        Toolkit.changeFileNameCustomExtension(new File(p),extension,changeFolderName.isChecked(),force);
                     }
                 return null;
             }
@@ -205,6 +221,8 @@ public class CustomizeActivity extends AppCompatActivity {
             @Override
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
+                selected_files.clear();
+                textView.setText("");
                 progressDialog.dismiss();
                 done(false);
             }
@@ -216,12 +234,10 @@ public class CustomizeActivity extends AppCompatActivity {
             @Override
             public void run() {
                 if (done){
-                    interstitial.show();
                     Snackbar.make(rootLayout, "ပြီးပါပြီ", Snackbar.LENGTH_LONG)
                             .setAction("ဟုတ်ပြီ", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    interstitial.show();
                                 }
                             })
                             .show();
@@ -253,7 +269,7 @@ public class CustomizeActivity extends AppCompatActivity {
                             .setNeutralButton("Done", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    interstitial.show();
+
                                 }
                             });
                     builder.show();
@@ -267,7 +283,7 @@ public class CustomizeActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode==100) {
             if (grantResults.length > 0 && grantResults[0]==PackageManager.PERMISSION_GRANTED) {
-                changeLOL(selected_files);
+                next();
             } else {
                 checkPermissions();
                 Toast.makeText(this, "You need to allow this permission!", Toast.LENGTH_SHORT).show();

@@ -18,20 +18,18 @@ public class AIOmmTool {
         return Rabbit.uni2zg(input);
     }
 
-    public static String getUnicode(String input){
-        if (input!=null) {
-            if (Constants.CHANGING.equalsIgnoreCase("zawgyi")){
-                return getZawgyi(input);
-            }else if (Constants.CHANGING.equalsIgnoreCase("unicode")){
-                double score = detector.getZawgyiProbability(input);
-                if (score < 0.999) {
-                    return input;
-                } else
-                return Rabbit.zg2uni(input);
-            }
-            return input;
+    public static String getUnicode(String input,boolean force){
+        if (force){
+            return zawgyi2Unicode(input);
         }
-        return "";
+        if (input!=null) {
+            double score = detector.getZawgyiProbability(input);
+            if (score < 0.999) {
+                return zawgyi2Unicode(unicode2Zawgyi(input));
+            } else
+                return Rabbit.zg2uni(input);
+        }
+        return input;
     }
 
     public static String getZawgyi(String input){

@@ -13,7 +13,7 @@ public class MyAppz extends Application {
         ViewPump.init(ViewPump.builder()
                 .addInterceptor(new CalligraphyInterceptor(
                         new CalligraphyConfig.Builder()
-                                .setDefaultFontPath("fonts/Pyidaungsu-Regular.ttf")
+                                .setDefaultFontPath("fonts/mm.ttf")
                                 .setFontAttrId(R.attr.fontPath)
                                 .build()))
                 .build());

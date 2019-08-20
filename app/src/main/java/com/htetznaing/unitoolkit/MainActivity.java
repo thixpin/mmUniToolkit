@@ -14,6 +14,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -24,13 +25,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
-
-import com.google.android.gms.ads.AdSize;
 import com.google.android.material.snackbar.Snackbar;
 import com.htetznaing.app_updater.AppUpdater;
-import com.htetznaing.unitoolkit.Ads.Banner;
-import com.htetznaing.unitoolkit.Ads.Interstitial;
 import com.htetznaing.unitoolkit.Utils.CheckInternet;
 import com.htetznaing.unitoolkit.Utils.Toolkit;
 
@@ -48,10 +46,6 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences sharedPreferences;
     String zgORuni = null;
     public static MainActivity instance;
-
-    LinearLayout adLayout;
-    Interstitial interstitial;
-
     //Update
     AppUpdater appUpdater;
     CheckInternet checkInternet;
@@ -67,15 +61,11 @@ public class MainActivity extends AppCompatActivity {
 
         appUpdater = new AppUpdater(this,"https://myappupdateserver.blogspot.com/2019/07/mmunicodetookit.html");
         checkInternet = new CheckInternet(this);
-        adLayout = findViewById(R.id.adLayout);
-        new Banner(this,adLayout, AdSize.SMART_BANNER);
-        interstitial = new Interstitial(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        setDefault();
     }
 
     public void changeAll(View view) {
@@ -110,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    private void changeAll() {
+    private void changeAll(final boolean force) {
         new AsyncTask<Void,Void,Void>(){
 
             @Override
@@ -125,9 +115,9 @@ public class MainActivity extends AppCompatActivity {
             protected Void doInBackground(Void... voids) {
                 ArrayList<String > path = getStorage();
                 for (String p:path){
-                    Toolkit.changeFileNameToUnicode(new File(p));
+                    Toolkit.changeFileNameToUnicode(new File(p),force);
                 }
-                Toolkit.changeContacts(MainActivity.this);
+                Toolkit.changeContacts(MainActivity.this,force);
                 return null;
             }
 
@@ -168,16 +158,8 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     }
                 }
-
-                System.out.println(how+" : "+WHAT);
                 if (how){
-                    switch (WHAT){
-                        case ALL:changeAll();break;
-                        case AUDIO:changeAudio();break;
-                        case VIDEO:changeVideo();break;
-                        case IMAGE:changeImage();break;
-                        case CONTACTS:changeContacts();break;
-                    }
+                    next();
                 }
             } else {
                 checkPermissions();
@@ -186,12 +168,53 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void next(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setTitle("သတိပြုရန်!!")
+                .setMessage("သင်ပြောင်းမည့်အရာသည် အားလုံးဇော်ဂျီဖြစ်နေရင်\n" +
+                        "* မဖြစ်မနေပြောင်းမည် * ကိုရွေးချယ်ပါ။\n" +
+                        "ဇော်ဂျီနှင့်ယူနီကုဒ်ရောထွေးနေပါက * အလိုအလျောက် * ကိုရွေးချယ်ပါ။\n" +
+                        "အဘယ်ကြောင့်ဆိုသော် ယူနီကုဒ်ဖြင့်ရေးထားသည့်စာများပါဝင်နေပါက\n" +
+                        "ယူနီကုဒ်သို့မဖြစ်မနေပြောင်းသောအခါ စာများလုံးဝလွဲသွားမည်ဖြစ်သည်။")
+                .setPositiveButton("အလိုအလျောက်", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (WHAT){
+                            case ALL:changeAll(false);break;
+                            case AUDIO:changeAudio(false);break;
+                            case VIDEO:changeVideo(false);break;
+                            case IMAGE:changeImage(false);break;
+                            case CONTACTS:changeContacts(false);break;
+                        }
+                    }
+                })
+                .setNegativeButton("မဖြစ်မနေပြောင်းမည်", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (WHAT){
+                            case ALL:changeAll(true);break;
+                            case AUDIO:changeAudio(true);break;
+                            case VIDEO:changeVideo(true);break;
+                            case IMAGE:changeImage(true);break;
+                            case CONTACTS:changeContacts(true);break;
+                        }
+                    }
+                })
+                .setNeutralButton("မလုပ်တော့ပါ", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                });
+        builder.show();
+    }
+
     public void changeAudio(View view) {
         WHAT = AUDIO;
         alert(AUDIO);
     }
 
-    private void changeAudio() {
+    private void changeAudio(final boolean force) {
         new AsyncTask<Void,Void,Void>(){
 
             @Override
@@ -206,7 +229,7 @@ public class MainActivity extends AppCompatActivity {
             protected Void doInBackground(Void... voids) {
                 ArrayList<String > path = getStorage();
                 for (String p:path){
-                    Toolkit.audioFileNameToUnicode(new File(p));
+                    Toolkit.audioFileNameToUnicode(new File(p),force);
                 }
                 return null;
             }
@@ -225,7 +248,7 @@ public class MainActivity extends AppCompatActivity {
         alert(VIDEO);
     }
 
-    private void changeVideo() {
+    private void changeVideo(final boolean force) {
         new AsyncTask<Void,Void,Void>(){
 
             @Override
@@ -240,7 +263,7 @@ public class MainActivity extends AppCompatActivity {
             protected Void doInBackground(Void... voids) {
                 ArrayList<String > path = getStorage();
                 for (String p:path){
-                    Toolkit.videoFileNameToUnicode(new File(p));
+                    Toolkit.videoFileNameToUnicode(new File(p),force);
                 }
                 return null;
             }
@@ -259,7 +282,7 @@ public class MainActivity extends AppCompatActivity {
         alert(IMAGE);
     }
 
-    private void changeImage() {
+    private void changeImage(final boolean force) {
         new AsyncTask<Void,Void,Void>(){
 
             @Override
@@ -274,7 +297,7 @@ public class MainActivity extends AppCompatActivity {
             protected Void doInBackground(Void... voids) {
                 ArrayList<String > path = getStorage();
                 for (String p:path){
-                    Toolkit.imageFileNameToUnicode(new File(p));
+                    Toolkit.imageFileNameToUnicode(new File(p),force);
                 }
                 return null;
             }
@@ -293,7 +316,7 @@ public class MainActivity extends AppCompatActivity {
         alert(CONTACTS);
     }
 
-    private void changeContacts(){
+    private void changeContacts(final boolean force){
         new AsyncTask<Void,Void,Void>(){
 
             @Override
@@ -305,7 +328,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             protected Void doInBackground(Void... voids) {
-                Toolkit.changeContacts(MainActivity.this);
+                Toolkit.changeContacts(MainActivity.this,force);
                 return null;
             }
 
@@ -337,8 +360,7 @@ public class MainActivity extends AppCompatActivity {
                                 "<p><strong><span style=\"color: #ff0000;\">ဗီဒီယိုဖိုင်များ</span></strong><br />Video ဖိုင်အားလုံး (Mp4, 3pg, etc..) အားလုံးကို<br />ယူနီကုဒ်နာမည်နဲ့ပြောင်းပေးသွားမှာပါ။</p>\n" +
                                 "<p><span style=\"color: #ff0000;\"><strong>ဓာတ်ပုံများ</strong></span><br />ဓာတ်ပုံ (jpg, png, etc...) အားလုံးကို<br />ယူနီကုဒ်နာမည်နဲ့ပြောင်းပေးသွားမှာပါ။</p>\n" +
                                 "<p><strong><span style=\"color: #ff0000;\">ဖုန်းအဆက်အသွယ်များ</span></strong><br />သင့်ဖုန်း Contacts အတွင်းရှိ<br />ဇော်ဂျီဖြင့်ရေးသားထားသောအမည်များအားလုံးကို<br />ယူနီကုဒ်ဖြင့်ပြောင်းပေးသွားမည်။</p>\n" +
-                                "<p><strong><span style=\"color: #ff0000;\">Bonus</span></strong><br />အပိုအနေနဲ့ယူနီကုဒ်ထည့်သွင်းရန်လိုအပ်သော<br />zFont - Custom Font Installer နဲ့<br />စာရိုက်ရန်လိုအပ်သော Keyboard တို့လိုလည်းလင့်ခ်ချိတ်ပေးထားပါတယ်။<br />zFont ကတော့စိတ်ကြိုက်ဖောင့်အလှမျိုးစုံကို<br />ဖုန်းတော်တော်များများမှာ အလွယ်တကူပြောင်းပေးနိုင်ပါတယ်။<br />ကီးဘုတ်ကတော့ကိုယ်ကြိုက်တာအသုံးပြုနိုင်အောင်စုပေးထားတာပါ။</p>\n" +
-                                "<p>ခွန်ထက်နိုင်<br />(ဇူလိုင်လ ၂၈ ရက်၊ ၂၀၁၉)</p>"))
+                                "<p><strong><span style=\"color: #ff0000;\">အခြား</span></strong><br />အပိုအနေနဲ့ယူနီကုဒ်ထည့်သွင်းရန်လိုအပ်သော<br />zFont - Custom Font Installer နဲ့<br />ဇော်ဂျီနှင့်ယူနီကုဒ် SMS အားလုံးဖတ်လို့ရသော MyanSMS<br/>စာရိုက်ရန်လိုအပ်သော Keyboard တို့လိုလည်းလင့်ခ်ချိတ်ပေးထားပါတယ်။<br />zFont ကတော့စိတ်ကြိုက်ဖောင့်အလှမျိုးစုံကို<br />ဖုန်းတော်တော်များများမှာ အလွယ်တကူပြောင်းပေးနိုင်ပါတယ်။<br />ကီးဘုတ်ကတော့ကိုယ်ကြိုက်တာအသုံးပြုနိုင်အောင်စုပေးထားတာပါ။</p>"))
                         .setPositiveButton("ဟုတ်ပြီ", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -381,20 +403,14 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         if (checkPermissions()){
-                            switch (WHATz){
-                                case ALL:changeAll();break;
-                                case AUDIO:changeAudio();break;
-                                case VIDEO:changeVideo();break;
-                                case IMAGE:changeImage();break;
-                                case CONTACTS:changeContacts();break;
-                            }
+                            next();
                         }
                     }
                 })
                 .setNegativeButton("မလုပ်ပါ", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        interstitial.show();
+
                     }
                 });
         builder.show();
@@ -406,12 +422,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 if (contacts) {
-                    interstitial.show();
                     Snackbar.make(rootLayout, "ပြီးပါပြီ", Snackbar.LENGTH_LONG)
                             .setAction("ဟုတ်ပြီ", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    interstitial.show();
+
                                 }
                             })
                             .show();
@@ -443,7 +458,7 @@ public class MainActivity extends AppCompatActivity {
                             .setNeutralButton("Done", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    interstitial.show();
+
                                 }
                             });
                     builder.show();
@@ -517,24 +532,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode==100){
-            interstitial.show();
+
         }
     }
 
     public void customize(View view) {
         startActivity(new Intent(this,CustomizeActivity.class));
-    }
-
-
-    private void setDefault(){
-        zgORuni = sharedPreferences.getString(Constants.CONVERT_TO_KEY,null);
-        boolean change_hidden = sharedPreferences.getBoolean(Constants.CHANGE_HIDDEN_KEY,false);
-
-        if (zgORuni==null) {
-            sharedPreferences.edit().putString(Constants.CONVERT_TO_KEY, "unicode").apply();
-        }
-        Constants.setCHANGING(zgORuni);
-        Constants.setChangeHidden(change_hidden);
     }
 
     @Override
@@ -552,7 +555,7 @@ public class MainActivity extends AppCompatActivity {
                 .setNegativeButton("မထွက်သေးပါ", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        interstitial.show();
+
                     }
                 });
         builder.show();
@@ -564,5 +567,9 @@ public class MainActivity extends AppCompatActivity {
         if (checkInternet.isInternetOn()){
             appUpdater.check(false);
         }
+    }
+
+    public void myansms(View view) {
+        startActivityForResult(new Intent(Intent.ACTION_VIEW, Uri.parse("http://bit.ly/myansms")),100);
     }
 }

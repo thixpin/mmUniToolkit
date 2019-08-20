@@ -50,10 +50,8 @@ public class AppUpdater {
     private String downloadPath;
     private DownloadManager mDownloadManager;
     private long mDownloadedFileID;
-    private DownloadManager.Request mRequest;
     private String download = null;
     private String versionName = null;
-    private int versionCode=0;
     private boolean uninstall = false,force=true;
     private String json_url;
     private TedPermission.Builder permission;
@@ -197,7 +195,7 @@ public class AppUpdater {
             final String message = data.getMessage();
             final String playStore = data.getPlaystore();
             uninstall = data.isUninstall();
-            versionCode = data.getVersionCode();
+            int versionCode = data.getVersionCode();
             versionName = data.getVersionName();
             download = data.getDownload();
             force = data.isForce();
@@ -212,7 +210,7 @@ public class AppUpdater {
                 e.printStackTrace();
             }
 
-            if (versionCode==currentVersion || versionCode<currentVersion){
+            if (versionCode ==currentVersion || versionCode <currentVersion){
                 if (showMessage) {
                     builder.setTitle("Congratulations!")
                             .setDescription("You are on latest version!")
@@ -311,7 +309,7 @@ public class AppUpdater {
                 if (!myFile.exists()) {
                     String mFilePath = "file://" + mBaseFolderPath + fileName;
                     Uri downloadUri = Uri.parse(url);
-                    mRequest = new DownloadManager.Request(downloadUri);
+                    DownloadManager.Request mRequest = new DownloadManager.Request(downloadUri);
                     mRequest.setDestinationUri(Uri.parse(mFilePath));
                     mRequest.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
                     mDownloadedFileID = mDownloadManager.enqueue(mRequest);
@@ -371,6 +369,7 @@ public class AppUpdater {
         String path = null;
         String[] proj = { MediaStore.MediaColumns.DATA };
         Cursor cursor = activity.getContentResolver().query(contentUri, proj, null, null, null);
+        assert cursor != null;
         if (cursor.moveToFirst()) {
             int column_index = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
             path = cursor.getString(column_index);

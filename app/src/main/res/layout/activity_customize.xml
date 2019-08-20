@@ -60,16 +60,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-
-        <LinearLayout
-            android:gravity="center"
-            android:orientation="vertical"
-            android:id="@+id/adLayout"
-            android:layout_marginTop="5dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-        </LinearLayout>
-
     </LinearLayout>
 
 </ScrollView>
