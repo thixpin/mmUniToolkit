@@ -5,13 +5,14 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.google.myanmartools.ZawgyiDetector;
-import com.htetznaing.unitoolkit.Constants;
 
 public class AIOmmTool {
     private static final ZawgyiDetector detector = new ZawgyiDetector();
 
     public static String zawgyi2Unicode(String input){
-        return Rabbit.zg2uni(input);
+        String unicode = Rabbit.zg2uni(input);
+        String zawgyi = Rabbit.uni2zg(unicode);
+        return Rabbit.zg2uni(zawgyi);
     }
 
     public static String unicode2Zawgyi(String input){

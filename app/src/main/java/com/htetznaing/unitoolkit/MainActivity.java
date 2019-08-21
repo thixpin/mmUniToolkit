@@ -53,6 +53,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+//        startActivity(new Intent(this,TestX.class));
         instance = this;
         progressDialog = new ProgressDialog(this);
         progressDialog.setCancelable(false);
@@ -472,34 +474,6 @@ public class MainActivity extends AppCompatActivity {
         super.attachBaseContext(ViewPumpContextWrapper.wrap(newBase));
     }
 
-    public void frozen(View view) {
-        openPlayStore("ninja.thiha.frozenkeyboard2");
-    }
-
-    public void m(View view) {
-        openPlayStore("com.myatminsoe.mkeyboardlite");
-    }
-
-    public void mua(View view) {
-        openPlayStore("com.sanlin.mkeyboard");
-    }
-
-    public void tt(View view) {
-        openPlayStore("com.myopenware.ttkeyboard.latin");
-    }
-
-    public void bagan(View view) {
-        openPlayStore("com.bit.androsmart.kbinapp");
-    }
-
-    public void manic(View view) {
-        openPlayStore("com.lmkhant.android.manickeyboard");
-    }
-
-    public void k(View view) {
-        openPlayStore("mm.kst.keyboard.myanmar");
-    }
-
     public void zfont(View view) {
         openPlayStore("com.mgngoe.zfont");
     }
@@ -507,9 +481,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void openPlayStore(String appPackageName){
         try {
-            startActivityForResult(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)),100);
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
         } catch (android.content.ActivityNotFoundException anfe) {
-            startActivityForResult(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)),100);
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
         }
     }
 
@@ -517,23 +491,15 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         try {
             intent.setData(Uri.parse("fb://profile/"+userId));
-            startActivityForResult(intent,100);
+            startActivity(intent);
         } catch (Exception e) {
             intent.setData(Uri.parse("https://m.facebook.com/"+userId));
-            startActivityForResult(intent,100);
+            startActivity(intent);
         }
     }
 
     public void dev(View view) {
         openFb("100030031876000");
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode==100){
-
-        }
     }
 
     public void customize(View view) {
@@ -567,9 +533,5 @@ public class MainActivity extends AppCompatActivity {
         if (checkInternet.isInternetOn()){
             appUpdater.check(false);
         }
-    }
-
-    public void myansms(View view) {
-        startActivityForResult(new Intent(Intent.ACTION_VIEW, Uri.parse("http://bit.ly/myansms")),100);
     }
 }

@@ -10,22 +10,12 @@ android {
         versionName "1.1"
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        externalNativeBuild {
-            cmake {
-                cppFlags ""
-            }
-        }
     }
     buildTypes {
         release {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-    }
-    externalNativeBuild {
-        cmake {
-            path file('CMakeLists.txt')
         }
     }
 }
@@ -47,9 +37,10 @@ dependencies {
     implementation 'com.github.mabbas007:TagsEditText:1.0.5'
     implementation 'com.nononsenseapps:filepicker:4.1.0'
     implementation project(path: ':app_updater')
-    implementation 'com.google.firebase:firebase-core:17.0.1'
+    implementation 'com.google.firebase:firebase-core:17.1.0'
     // Add dependency
     implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
+    implementation 'com.ajts.androidmads.SQLite2Excel:library:1.0.4'
 }
 apply plugin: 'io.fabric'
 apply plugin: 'com.google.gms.google-services'
