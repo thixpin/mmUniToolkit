@@ -134,6 +134,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ArrayList<String> getStorage() {
         ArrayList<String> path = new ArrayList<>();
+        path.add(Environment.getExternalStorageDirectory().getAbsolutePath());
         String [] a = Toolkit.getExternalStorageDirectories(getApplicationContext());
         if (a!=null && a.length>0){
             for (String p:a){
@@ -142,7 +143,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-        path.add(Environment.getExternalStorageDirectory().getAbsolutePath());
         return path;
     }
 
