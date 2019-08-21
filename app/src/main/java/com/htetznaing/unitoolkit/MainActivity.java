@@ -362,7 +362,11 @@ public class MainActivity extends AppCompatActivity {
                                 "<p><strong><span style=\"color: #ff0000;\">ဗီဒီယိုဖိုင်များ</span></strong><br />Video ဖိုင်အားလုံး (Mp4, 3pg, etc..) အားလုံးကို<br />ယူနီကုဒ်နာမည်နဲ့ပြောင်းပေးသွားမှာပါ။</p>\n" +
                                 "<p><span style=\"color: #ff0000;\"><strong>ဓာတ်ပုံများ</strong></span><br />ဓာတ်ပုံ (jpg, png, etc...) အားလုံးကို<br />ယူနီကုဒ်နာမည်နဲ့ပြောင်းပေးသွားမှာပါ။</p>\n" +
                                 "<p><strong><span style=\"color: #ff0000;\">ဖုန်းအဆက်အသွယ်များ</span></strong><br />သင့်ဖုန်း Contacts အတွင်းရှိ<br />ဇော်ဂျီဖြင့်ရေးသားထားသောအမည်များအားလုံးကို<br />ယူနီကုဒ်ဖြင့်ပြောင်းပေးသွားမည်။</p>\n" +
-                                "<p><strong><span style=\"color: #ff0000;\">အခြား</span></strong><br />အပိုအနေနဲ့ယူနီကုဒ်ထည့်သွင်းရန်လိုအပ်သော<br />zFont - Custom Font Installer နဲ့<br />ဇော်ဂျီနှင့်ယူနီကုဒ် SMS အားလုံးဖတ်လို့ရသော MyanSMS<br/>စာရိုက်ရန်လိုအပ်သော Keyboard တို့လိုလည်းလင့်ခ်ချိတ်ပေးထားပါတယ်။<br />zFont ကတော့စိတ်ကြိုက်ဖောင့်အလှမျိုးစုံကို<br />ဖုန်းတော်တော်များများမှာ အလွယ်တကူပြောင်းပေးနိုင်ပါတယ်။<br />ကီးဘုတ်ကတော့ကိုယ်ကြိုက်တာအသုံးပြုနိုင်အောင်စုပေးထားတာပါ။</p>"))
+                                "<p><strong><span style=\"color: #ff0000;\">အခြား</span></strong><br />အပိုအနေနဲ့ယူနီကုဒ်ထည့်သွင်းရန်လိုအပ်သော<br />zFont - Custom Font Installer ကိုလင့်ခ်ချိတ်ပေးထားပါတယ်။<br /><br /></p>\n" +
+                                "<p><span style=\"color: #ff0000;\"><strong>Special thank &amp; credits</strong></span><br /><br /><strong>Rabbit</strong><br /><a href=\"https://github.com/Rabbit-Converter/Rabbit\">https://github.com/Rabbit-Converter/Rabbit</a></p>\n" +
+                                "<p><strong>Myanmar Tools</strong><br /><a href=\"https://github.com/google/myanmar-tools\">https://github.com/google/myanmar-tools</a></p>\n" +
+                                "<p><strong>Jaudiotagger</strong><br /><a href=\"https://github.com/AdrienPoupa/jaudiotagger\">https://github.com/AdrienPoupa/jaudiotagger</a></p>\n" +
+                                "<p><strong>NoNonsense-FilePicker</strong><br /><a href=\"https://github.com/spacecowboy/NoNonsense-FilePicker\">https://github.com/spacecowboy/NoNonsense-FilePicker</a></p>"))
                         .setPositiveButton("ဟုတ်ပြီ", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
